@@ -1,0 +1,327 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PLTMH Anggi - Monitor Listrik</title>
+
+<style>
+:root {
+    --bg: rgba(8, 19, 29, 0.78);
+    --border: #50616f;
+    --accent: #b8d5e8;
+    --white: #fff;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    color: var(--white);
+    min-height: 100vh;
+    padding: 18px;
+    background:
+        linear-gradient(rgba(5,15,25,.72), rgba(5,15,25,.82)),
+        url("https://ahabe.wordpress.com/wp-content/uploads/2026/10/screenshot-2025-05-13-062805.jpg")
+        center / cover fixed no-repeat;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-size: clamp(26px, 3vw, 42px);
+    margin-bottom: 8px;
+}
+
+h2 {
+    font-size: clamp(16px, 2vw, 23px);
+    font-weight: normal;
+    margin-bottom: 10px;
+}
+
+#status {
+    color: var(--accent);
+    font-size: 14px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    max-width: 1500px;
+    margin: auto;
+}
+
+.panel {
+    min-width: 0;
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg);
+    backdrop-filter: blur(4px);
+}
+
+.panel h3 {
+    color: var(--accent);
+    font-size: 17px;
+    margin-bottom: 12px;
+}
+
+.metric {
+    font-size: clamp(27px, 3vw, 43px);
+    font-weight: bold;
+    overflow-wrap: anywhere;
+    margin: 10px 0;
+}
+
+.unit {
+    font-size: 13px;
+    color: var(--accent);
+}
+
+.chart {
+    width: 100%;
+    height: 270px;
+    display: block;
+    border: 0;
+    border-radius: 7px;
+    background: white;
+}
+
+.gauge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 210px;
+    gap: 12px;
+}
+
+.gauge-ring {
+    width: 155px;
+    height: 155px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: conic-gradient(
+        #44d18a var(--gauge-angle, 0deg),
+        rgba(255,255,255,.15) 0deg
+    );
+    position: relative;
+}
+
+.gauge-ring::before {
+    content: "";
+    position: absolute;
+    inset: 12px;
+    background: #142430;
+    border-radius: 50%;
+}
+
+.gauge-value {
+    position: relative;
+    text-align: center;
+    font-size: 29px;
+    font-weight: bold;
+}
+
+.gauge-value small {
+    display: block;
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: normal;
+    margin-top: 4px;
+}
+
+footer {
+    text-align: center;
+    color: var(--accent);
+    font-size: 12px;
+    margin-top: 22px;
+}
+
+@media (max-width: 900px) {
+    .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .chart {
+        height: 240px;
+    }
+}
+
+@media (max-width: 520px) {
+    body {
+        padding: 10px;
+        background-attachment: scroll;
+    }
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>PLTMH ANGGI</h1>
+    <h2>MONITOR LISTRIK PZEM-004T</h2>
+    <div id="status">Menghubungkan ke ThingSpeak...</div>
+</header>
+
+<main class="grid">
+
+    <section class="panel">
+        <h3>Tegangan</h3>
+        <div class="metric"><span id="voltage">--</span></div>
+        <div class="unit">Volt (V)</div>
+    </section>
+
+    <section class="panel">
+        <h3>Arus</h3>
+        <div class="metric"><span id="current">--</span></div>
+        <div class="unit">Ampere (A)</div>
+    </section>
+
+    <section class="panel">
+        <h3>Daya Aktif</h3>
+        <div class="metric"><span id="power">--</span></div>
+        <div class="unit">Watt (W)</div>
+    </section>
+
+    <section class="panel">
+        <h3>Energi</h3>
+        <div class="metric"><span id="energy">--</span></div>
+        <div class="unit">kWh (sesuai satuan field)</div>
+    </section>
+
+    <section class="panel">
+        <h3>Frekuensi</h3>
+        <div class="metric"><span id="frequency">--</span></div>
+        <div class="unit">Hertz (Hz)</div>
+    </section>
+
+    <section class="panel">
+        <h3>Faktor Daya</h3>
+        <div class="metric"><span id="pf">--</span></div>
+        <div class="unit">Power Factor</div>
+    </section>
+
+    <section class="panel">
+        <h3>Chart Tegangan</h3>
+        <iframe class="chart"
+            title="Grafik tegangan"
+            src="https://thingspeak.com/channels/3542836/charts/1?bgcolor=%23ffffff&color=%23007bff&dynamic=true&results=60&type=line"
+            loading="lazy">
+        </iframe>
+    </section>
+
+    <section class="panel">
+        <h3>Chart Daya</h3>
+        <iframe class="chart"
+            title="Grafik daya"
+            src="https://thingspeak.com/channels/3542836/charts/3?bgcolor=%23ffffff&color=%23ff6600&dynamic=true&results=60&type=line"
+            loading="lazy">
+        </iframe>
+    </section>
+
+    <section class="panel">
+        <h3>Gauge Tegangan</h3>
+        <div class="gauge">
+            <div class="gauge-ring" id="gaugeRing">
+                <div class="gauge-value">
+                    <span id="gaugeVoltage">--</span>
+                    <small>Volt</small>
+                </div>
+            </div>
+            <div class="unit">Skala 0–250 V</div>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    Data listrik melalui ESP32 dan ThingSpeak
+</footer>
+
+<script>
+const CHANNEL_ID = "3542836";
+const FETCH_INTERVAL = 20000;
+
+async function updateData() {
+    const status = document.getElementById("status");
+
+    try {
+        const url =
+            `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last.json`;
+
+        const response = await fetch(url, { cache: "no-store" });
+
+        if (!response.ok) {
+            throw new Error("HTTP " + response.status);
+        }
+
+        const data = await response.json();
+
+        const metrics = [
+            ["voltage", data.field1, 1],
+            ["current", data.field2, 3],
+            ["power", data.field3, 1],
+            ["energy", data.field4, 3],
+            ["frequency", data.field5, 1],
+            ["pf", data.field6, 2]
+        ];
+
+        for (const [id, value, decimals] of metrics) {
+            const el = document.getElementById(id);
+
+            el.textContent =
+                value == null || value === ""
+                    ? "--"
+                    : Number(value).toFixed(decimals);
+        }
+
+        const voltage = Number(data.field1);
+
+        if (data.field1 != null && Number.isFinite(voltage)) {
+            document.getElementById("gaugeVoltage").textContent =
+                voltage.toFixed(1);
+
+            const angle = Math.max(0, Math.min(1, voltage / 250)) * 360;
+
+            document.getElementById("gaugeRing").style.setProperty(
+                "--gauge-angle",
+                angle + "deg"
+            );
+        }
+
+        const time = data.created_at
+            ? new Date(data.created_at).toLocaleString("id-ID", {
+                timeZone: "Asia/Jakarta",
+                dateStyle: "short",
+                timeStyle: "medium"
+            })
+            : "waktu tidak tersedia";
+
+        status.textContent = "Data terakhir: " + time + " WIB";
+
+    } catch (error) {
+        status.textContent =
+            "Gagal membaca data: " + error.message;
+    }
+}
+
+updateData();
+setInterval(updateData, FETCH_INTERVAL);
+</script>
+
+</body>
+</html>
